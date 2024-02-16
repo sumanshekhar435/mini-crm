@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Routing\RouteGroup;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,5 +15,14 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
+});
+
+Auth::routes();
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('companies/', [App\Http\Controllers\CompaniesController::class, 'index'])->name('companies');
+    Route::post('store-companies/', [App\Http\Controllers\CompaniesController::class, 'store'])->name('store-companies');
+    Route::post('delete-company/', [App\Http\Controllers\CompaniesController::class, 'delete'])->name('delete-company');
 });
