@@ -1,4 +1,5 @@
 @extends('layout.app')
+@section('company', 'active')
 @section('content')
     <!-- Content Wrapper. Contains page content -->
     <div class="content-wrapper">
@@ -7,7 +8,7 @@
             <div class="container-fluid">
                 <div class="row mb-2">
                     <div class="col-sm-6">
-                        <h1>DataTables</h1>
+                        <h1>Company Data</h1>
                     </div>
                     <div class="col-sm-6">
                         <button class="btn btn-primary btn-sm float-sm-right" data-toggle="modal"
@@ -22,9 +23,9 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
-                            <div class="card-header">
+                            {{-- <div class="card-header">
                                 <h3 class="card-title">DataTable with minimal features & hover style</h3>
-                            </div>
+                            </div> --}}
                             <!-- /.card-header -->
                             <div class="card-body">
                                 <table id="example2" class="table table-bordered table-hover">
@@ -47,7 +48,7 @@
                                                         alt=""></td>
                                                 <td>
                                                     <button type="button" data-toggle="modal" data-id="{{ $company->id }}"
-                                                        data-target="#editCompanyModal" class="btn-sm delete_company"
+                                                        data-target="#editCompanyModal" class="btn-sm edit_company"
                                                         style="border: 0; background:none;"><i
                                                             class="fas fa-edit text-gray"></i></button>
                                                     <button type="button" data-toggle="modal" data-id="{{ $company->id }}"
@@ -130,6 +131,12 @@
                                                     </div>
                                                 </div>
                                                 <small id="logo_error" class="form-text text-danger"></small>
+                                                <!-- Image preview -->
+                                                <div class="mt-2">
+                                                    <img src="{{ asset('assets/dist/img/image-upload-icon.jpg') }}"
+                                                        id="create_image_preview" alt="Image Preview"
+                                                        style="width: 80px; height: 80px;">
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- /.card-body -->
@@ -160,12 +167,15 @@
                         <span aria-hidden="true" style="color: black">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <section class="content">
-                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <form id="companyForm">
+                <form id="updateForm" action="{{ route('update-company') }}" method="post"
+                    enctype="multipart/form-data">
+                    @csrf
+                    <input type="hidden" name="hidden_company_id" id="hidden_company_id">
+                    <div class="modal-body">
+                        <section class="content">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <div class="col-md-12">
                                         <div class="card-body">
                                             <div class="form-group">
                                                 <label for="name">Company Name</label>
@@ -196,20 +206,25 @@
                                                     </div>
                                                 </div>
                                                 <small id="logo_error" class="form-text text-danger"></small>
+                                                <!-- Image preview -->
+                                                <div class="mt-2">
+                                                    <img src="" id="image_preview" alt="Image Preview"
+                                                        style="width: 80px; height: 80px;">
+                                                </div>
                                             </div>
                                         </div>
                                         <!-- /.card-body -->
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </section>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
-                    <button type="submit" id="edit_company_button"
-                        class="btn btn-primary btn-sm edit_company">Update</button>
-                </div>
+                        </section>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+                        <button type="submit" id="edit_company_button"
+                            class="btn btn-primary btn-sm edit_company">Update</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -270,6 +285,16 @@
         });
     </script>
     <script>
+        $('#comapanie_logo').change(function() {
+            var input = this;
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#create_image_preview').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
         $('.create_companies').on('click', function() {
             $('#create_companies_button').prop('disabled', true);
             var name = $('#comapanie_name').val();
@@ -359,4 +384,62 @@
             });
         });
     </script>
+    <script>
+        $(document).ready(function() {
+
+            // Event listener for file input change
+            $('#edit_company_logo').change(function() {
+                var input = this;
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#image_preview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            });
+
+            $('.edit_company').on('click', function() {
+                var company_id = $(this).data('id');
+                console.log();
+                $.ajax({
+                    type: "get",
+                    url: 'edit-company/' + company_id,
+                    success: function(response) {
+                        console.log(response.company.name);
+                        $('#hidden_company_id').val(company_id);
+                        $('#edit_company_name').val(response.company.name);
+                        $('#edit_company_email').val(response.company.email);
+                        $('#edit_company_website').val(response.company.website);
+                        $('#edit_company_logo').attr('src', response.company.logo);
+                        // Display image preview if logo exists
+                        if (response.company.logo) {
+                            $('#image_preview').attr('src', response.company.logo);
+                        } else {
+                            // Clear image preview if logo doesn't exist
+                            $('#image_preview').attr('src', '');
+                        }
+                        // Clear file input value
+                        $('#edit_company_logo').val('');
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function() {
+            $('#updateForm').submit(function(e) {
+                // Disable the "Update" button
+                $('#edit_company_button').prop('disabled', true);
+
+                // Show the loader
+                $('.loader-container').show();
+            });
+        });
+    </script>
+
+    @if (session('msg'))
+        <script>
+            showToast('bg-success', '{{ session('msg') }}');
+        </script>
+    @endif
 @stop

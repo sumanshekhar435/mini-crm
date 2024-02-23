@@ -16,17 +16,16 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                 data-accordion="false">
                 <li class="nav-item">
-                  <a href="{{route('companies')}}" class="nav-link active">
-                    <img src="{{asset('assets/dist/img/enterprise.png')}}" width="15%" height="auto" alt="">
-                    {{-- <i class="nav-icon fas fa-th"></i> --}}
+                    <a href="{{ route('companies') }}" class="nav-link @yield('company')">
+                        <i class="nav-icon fas fa-building"></i>
                         <p>
                             Companies
                         </p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <img src="{{asset('assets/dist/img/employee.png')}}" width="15%" height="auto" alt="">
+                    <a href="{{route('employees')}}" class="nav-link @yield('employees')">
+                        <i class="nav-icon fas fa-user"></i>
                         <p>
                             Employees
                         </p>
