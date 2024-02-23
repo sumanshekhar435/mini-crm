@@ -53,9 +53,9 @@ class CompaniesController extends Controller
         if (!$company) {
             return response()->json(['error' => 'Company not found'], 404);
         }
-    
+
         $deleted = $company->delete();
-    
+
         if ($deleted) {
             return response()->json(['message' => 'Company deleted successfully'], 200);
         } else {
@@ -91,5 +91,62 @@ class CompaniesController extends Controller
         }
         $company->save();
         return back()->with(['msg' => 'Company Data update successfully!']);
+    }
+
+    public function getCompanyDetailsById($id)
+    {
+        $company = Company::find($id);
+        if (!$company) {
+            return response()->json(['message' => 'Company not found.'], 404);
+        }
+
+        return response()->json(['company' => $company], 200);
+    }
+
+    public function storeCompany(Request $request)
+    {
+
+        $validatedData = $request->validate([
+            'name' => 'required|string',
+            'email' => 'required|email|unique:companies|max:255',
+        ]);
+
+        try {
+            if ($request->has('logo')) {
+                $file = $request->file('logo');
+                $filename = $file->getClientOriginalName();
+                $path = 'uploads/logos/';
+                $file->move($path, $filename);
+            }
+
+            $company = Company::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'website' => $request->website,
+                'logo' => $path . $filename,
+            ]);
+
+            return response()->json(['status' => 'success', 'company' => $company], 201);
+        } catch (\Exception $e) {
+
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getEmployees($company_id)
+    {
+        $company = Company::findOrFail($company_id);
+
+        if ($company) {
+            $employees = $company->employees;
+
+            if ($employees->isEmpty()) {
+                return response()->json(['status' => 'error', 'message' => 'No employees found for this company'], 404);
+            }
+
+            return response()->json(['status' => 'success', 'employees' => $employees]);
+        } else {
+            return response()->json(['status' => 'error', 'message' => 'Company not found'], 404);
+        }
     }
 }

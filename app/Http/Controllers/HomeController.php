@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
+use App\Models\Employee;
+use Illuminate\Foundation\Console\ViewMakeCommand;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -23,6 +26,8 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('pages.home');
+        $company = Company::get();
+        $employees = Employee::get();
+        return view('pages.home', compact('company', 'employees'));
     }
 }

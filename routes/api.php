@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CompaniesController;
+use App\Http\Controllers\EmployeesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +19,10 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/company/{id}', [CompaniesController::class, 'getCompanyDetailsById']);
+Route::post('company-store', [CompaniesController::class, 'storeCompany']);
+Route::get('/companies/{company_id}/employees', [CompaniesController::class, 'getEmployees']);
+Route::post('/store-employees', [EmployeesController::class, 'storeEmployees']);
+
+
