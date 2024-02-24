@@ -135,18 +135,24 @@ class CompaniesController extends Controller
 
     public function getEmployees($company_id)
     {
-        $company = Company::findOrFail($company_id);
+        try {
+            $company = Company::where('id',$company_id)->first();
 
-        if ($company) {
-            $employees = $company->employees;
+            if ($company) {
+                $employees = $company->employees;
 
-            if ($employees->isEmpty()) {
-                return response()->json(['status' => 'error', 'message' => 'No employees found for this company'], 404);
+                if ($employees->isEmpty()) {
+                    return response()->json(['status' => 'error', 'message' => 'No employees found for this company'], 404);
+                }
+
+                return response()->json(['status' => 'success', 'employees' => $employees]);
+            } else {
+                return response()->json(['status' => 'error', 'message' => 'Company not found'], 404);
             }
+        } catch (\Exception $e) {
 
-            return response()->json(['status' => 'success', 'employees' => $employees]);
-        } else {
-            return response()->json(['status' => 'error', 'message' => 'Company not found'], 404);
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 404);
+            
         }
     }
 }
